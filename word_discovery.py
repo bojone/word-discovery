@@ -191,17 +191,16 @@ db = pymongo.MongoClient().baike.items
 
 # 语料生成器，并且初步预处理语料
 def text_generator():
-    for d in db.find().limit(1000000):
-        yield re.sub(u'[^\u4e00-\u9fa50-9a-zA-Z ]+', '\n', strQ2B(d['summary']))
-        yield re.sub(u'[^\u4e00-\u9fa50-9a-zA-Z ]+', '\n', strQ2B(d['content']))
+    for d in db.find().limit(5000000):
+        yield re.sub(u'[^\u4e00-\u9fa50-9a-zA-Z ]+', '\n', d['text'])
 
 
 min_count = 32
 order = 4
-corpus_file = 'bk.corpus' # 语料保存的文件名
-vocab_file = 'bk.chars' # 字符集
-ngram_file = 'bk.ngrams' # ngram集
-output_file = 'bk.vocab' # 最后导出的词表
+corpus_file = 'wx.corpus' # 语料保存的文件名
+vocab_file = 'wx.chars' # 字符集
+ngram_file = 'wx.ngrams' # ngram集
+output_file = 'wx.vocab' # 最后导出的词表
 
 
 write_corpus(text_generator(), corpus_file) # 将语料转存为文本
