@@ -151,7 +151,7 @@ class SimpleTrie:
 
 
 def filter_vocab(candidates, ngrams, order):
-    """通过与ngrams对比，排除可能出来的不牢固的词汇
+    """通过与ngrams对比，排除可能出来的不牢固的词汇(回溯)
     """
     result = {}
     for i, j in candidates.items():
@@ -167,3 +167,64 @@ def filter_vocab(candidates, ngrams, order):
             if flag:
                 result[i] = j
     return result
+
+
+# ======= 算法构建完毕，下面开始执行完整的构建词库流程 =======
+
+
+def strQ2B(ustring): # 全角转半角
+    rstring = ''
+    for uchar in ustring:
+        inside_code=ord(uchar)
+        if inside_code == 12288: # 全角空格直接转换
+            inside_code = 32
+        elif (inside_code >= 65281 and inside_code <= 65374): # 全角字符（除空格）根据关系转化
+            inside_code -= 65248
+        rstring += unichr(inside_code)
+    return rstring
+
+
+import pymongo
+import re
+
+db = pymongo.MongoClient().baike.items
+
+# 语料生成器，并且初步预处理语料
+def text_generator():
+    for d in db.find().limit(1000000):
+        yield re.sub(u'[^\u4e00-\u9fa50-9a-zA-Z ]+', '\n', strQ2B(d['summary']))
+        yield re.sub(u'[^\u4e00-\u9fa50-9a-zA-Z ]+', '\n', strQ2B(d['content']))
+
+
+min_count = 32
+order = 4
+corpus_file = 'bk.corpus' # 语料保存的文件名
+vocab_file = 'bk.chars' # 字符集
+ngram_file = 'bk.ngrams' # ngram集
+output_file = 'bk.vocab' # 最后导出的词表
+
+
+write_corpus(text_generator(), corpus_file) # 将语料转存为文本
+count_ngrams(corpus_file, order, vocab_file, ngram_file) # 用KenLM统计ngram
+ngrams = KenlmNgrams(vocab_file, ngram_file, order, min_count) # 加载ngram
+ngrams = filter_ngrams(ngrams.ngrams, ngrams.total, [0, 1, 3, 5]) # 过滤ngram
+ngtrie = SimpleTrie() # 构建ngram的Trie树
+
+for w in Progress(ngrams, 100000, desc=u'build ngram trie'):
+    _ = ngtrie.add_word(w)
+
+candidates = {} # 得到候选词
+for t in Progress(text_generator(), 1000, desc='discovering words'):
+    for w in ngtrie.tokenize(t):
+        candidates[w] = candidates.get(w, 0) + 1
+
+# 频数过滤
+candidates = {i: j for i, j in candidates.items() if j >= min_count}
+# 互信息过滤(回溯)
+candidates = filter_vocab(candidates, ngrams, order)
+
+# 输出结果文件
+with open(output_file, 'w') as f:
+    for i, j in sorted(candidates.items(), key=lambda s: -s[1]):
+        s = '%s\t%s\n' % (i.encode('utf-8'), j)
+        f.write(s)
