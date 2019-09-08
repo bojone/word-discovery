@@ -214,7 +214,7 @@ for w in Progress(ngrams, 100000, desc=u'build ngram trie'):
 
 candidates = {} # 得到候选词
 for t in Progress(text_generator(), 1000, desc='discovering words'):
-    for w in ngtrie.tokenize(t):
+    for w in ngtrie.tokenize(t): # 预分词
         candidates[w] = candidates.get(w, 0) + 1
 
 # 频数过滤
