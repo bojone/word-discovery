@@ -204,7 +204,7 @@ output_file = 'wx.vocab' # 最后导出的词表
 
 
 write_corpus(text_generator(), corpus_file) # 将语料转存为文本
-count_ngrams(corpus_file, order, vocab_file, ngram_file) # 用kenlm统计ngram
+count_ngrams(corpus_file, order, vocab_file, ngram_file) # 用Kenlm统计ngram
 ngrams = KenlmNgrams(vocab_file, ngram_file, order, min_count) # 加载ngram
 ngrams = filter_ngrams(ngrams.ngrams, ngrams.total, [0, 1, 3, 5]) # 过滤ngram
 ngtrie = SimpleTrie() # 构建ngram的Trie树
