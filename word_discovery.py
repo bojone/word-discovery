@@ -190,6 +190,7 @@ import re
 db = pymongo.MongoClient().baike.items
 
 # 语料生成器，并且初步预处理语料
+# 这个生成器例子的具体含义不重要，只需要知道它就是逐句地把文本yield出来就行了
 def text_generator():
     for d in db.find().limit(5000000):
         yield re.sub(u'[^\u4e00-\u9fa50-9a-zA-Z ]+', '\n', d['text'])
