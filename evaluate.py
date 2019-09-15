@@ -2,7 +2,7 @@
 
 import os
 import jieba
-jieba.set_dictionary('wx2.vocab')
+jieba.set_dictionary('thucnews.vocab') # 手动截取前50000个词
 
 
 jieba.lcut(u'今天天气很不错')
