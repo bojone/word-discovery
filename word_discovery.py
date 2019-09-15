@@ -171,54 +171,26 @@ def filter_vocab(candidates, ngrams, order):
 
 # ======= 算法构建完毕，下面开始执行完整的构建词库流程 =======
 
-
-def strQ2B(ustring): # 全角转半角
-    rstring = ''
-    for uchar in ustring:
-        inside_code=ord(uchar)
-        if inside_code == 12288: # 全角空格直接转换
-            inside_code = 32
-        elif (inside_code >= 65281 and inside_code <= 65374): # 全角字符（除空格）根据关系转化
-            inside_code -= 65248
-        rstring += unichr(inside_code)
-    return rstring
-
-
-import pymongo
 import re
-
-db = pymongo.MongoClient().baike.items
+import glob
 
 # 语料生成器，并且初步预处理语料
 # 这个生成器例子的具体含义不重要，只需要知道它就是逐句地把文本yield出来就行了
 def text_generator():
-    for d in db.find().limit(5000000):
-        yield re.sub(u'[^\u4e00-\u9fa50-9a-zA-Z ]+', '\n', d['text'])
+    txts = glob.glob('/root/thuctc/THUCNews/*/*.txt')
+    for txt in txts:
+        d = open(txt).read()
+        d = d.decode('utf-8').replace(u'\u3000', ' ').strip()
+        yield re.sub(u'[^\u4e00-\u9fa50-9a-zA-Z ]+', '\n', d)
 
 
 min_count = 32
 order = 4
-corpus_file = 'wx.corpus' # 语料保存的文件名
-vocab_file = 'wx.chars' # 字符集
-ngram_file = 'wx.ngrams' # ngram集
-output_file = 'wx.vocab' # 最后导出的词表
+corpus_file = 'thucnews.corpus' # 语料保存的文件名
+vocab_file = 'thucnews.chars' # 字符集
+ngram_file = 'thucnews.ngrams' # ngram集
+output_file = 'thucnews.vocab' # 最后导出的词表
 
-
-"""
-# 读取《天龙八部》小说的生成器
-def text_generator():
-    with open('tianlongbabu.txt') as f:
-        for l in f:
-            yield re.sub(u'[^\u4e00-\u9fa50-9a-zA-Z ]+', '\n', l.decode('gbk'))
-
-
-min_count = 8
-order = 4
-corpus_file = 'tl.corpus' # 语料保存的文件名
-vocab_file = 'tl.chars' # 字符集
-ngram_file = 'tl.ngrams' # ngram集
-output_file = 'tl.vocab' # 最后导出的词表
-"""
 
 write_corpus(text_generator(), corpus_file) # 将语料转存为文本
 count_ngrams(corpus_file, order, vocab_file, ngram_file) # 用Kenlm统计ngram
@@ -242,5 +214,5 @@ candidates = filter_vocab(candidates, ngrams, order)
 # 输出结果文件
 with open(output_file, 'w') as f:
     for i, j in sorted(candidates.items(), key=lambda s: -s[1]):
-        s = '%s\t%s\n' % (i.encode('utf-8'), j)
+        s = '%s %s\n' % (i.encode('utf-8'), j)
         f.write(s)
