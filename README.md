@@ -7,6 +7,6 @@
 
 ## 实测结果
 
-在经过充分训练的情况下，用bakeoff2005的pku语料进行测试，能得到0.746的F1，优于ICLR 2019的<a href="https://openreview.net/forum?id=r1NDBsAqY7" target="_blank">《Unsupervised Word Discovery with Segmental Neural Language Models》</a>的0.731
+在经过充分训练的情况下，用bakeoff2005的pku语料进行测试，能得到0.765的F1，优于ICLR 2019的<a href="https://openreview.net/forum?id=r1NDBsAqY7" target="_blank">《Unsupervised Word Discovery with Segmental Neural Language Models》</a>的0.731
 
 （注：这里是为了给效果提供一个直观感知，比较可能是不公平的，因为我不确定这篇论文中的训练集用了哪些语料。但我感觉在相同时间内本文算法会优于论文的算法，因为直觉论文的算法训练起来会很慢。作者也没有开源，所以有不少不确定之处，如有错谬，请读者指正。）
