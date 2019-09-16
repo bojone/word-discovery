@@ -187,9 +187,9 @@ def text_generator():
 min_count = 32
 order = 4
 corpus_file = 'thucnews.corpus' # 语料保存的文件名
-vocab_file = 'thucnews.chars' # 字符集
-ngram_file = 'thucnews.ngrams' # ngram集
-output_file = 'thucnews.vocab' # 最后导出的词表
+vocab_file = 'thucnews.chars' # 字符集保存的文件名
+ngram_file = 'thucnews.ngrams' # ngram集保存的文件名
+output_file = 'thucnews.vocab' # 最后导出的词表文件名
 
 
 write_corpus(text_generator(), corpus_file) # 将语料转存为文本
