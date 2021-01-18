@@ -63,13 +63,16 @@ class KenlmNgrams:
         self.ngrams = [{} for _ in range(self.order)]
         self.total = 0
         size_per_item = self.order * 4 + 8
-        f = open(self.ngram_file, 'rb')
-        filedata = f.read()
-        filesize = f.tell()
-        f.close()
-        for i in Progress(range(0, filesize, size_per_item), 100000, desc=u'loading ngrams'):
-            s = filedata[i: i+size_per_item]
-            n = self.unpack('l', s[-8:])
+        def ngrams():
+            with open(self.ngram_file, 'rb') as f:
+                while True:
+                    s = f.read(size_per_item)
+                    if len(s) == size_per_item:
+                        n = self.unpack('l', s[-8:])
+                        yield s, n
+                    else:
+                        break
+        for s, n in Progress(ngrams(), 100000, desc=u'loading ngrams'):
             if n >= self.min_count:
                 self.total += n
                 c = [self.unpack('i', s[j*4: (j+1)*4]) for j in range(self.order)]
