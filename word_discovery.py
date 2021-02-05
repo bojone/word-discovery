@@ -172,6 +172,7 @@ def filter_vocab(candidates, ngrams, order):
             for k in range(len(i) + 1 - order):
                 if i[k: k+order] not in ngrams:
                     flag = False
+                    break
             if flag:
                 result[i] = j
     return result
